@@ -13,7 +13,7 @@ ENV CURSOR_DOWNLOAD_URL=https://downloads.cursor.com/production/6af2d906e8ca9165
 
 # Update and install necessary packages
 RUN echo "**** install packages ****" && \
-    add-apt-repository ppa:dotnet/backports \
+    add-apt-repository ppa:dotnet/backports && \
     apt-get update && \
     apt-get install -y --no-install-recommends curl fuse python3.11-venv libfuse2 python3-xdg libgtk-3-0 \
     libnotify4 libatspi2.0-0 libsecret-1-0 libnss3 desktop-file-utils fonts-noto-color-emoji git ssh-askpass dotnet-sdk-9.0
