@@ -1,4 +1,4 @@
-FROM ghcr.io/linuxserver/baseimage-kasmvnc:ubuntunoble
+FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
 
 LABEL maintainer="arfo_dublo@boards.digital" \
     org.opencontainers.image.authors="arfo_dublo@boards.digital" \
