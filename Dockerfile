@@ -10,11 +10,6 @@ LABEL maintainer="arfo_dublo@boards.digital" \
 ENV DISPLAY=:1
 ENV CURSOR_DOWNLOAD_URL=https://downloads.cursor.com/production/6af2d906e8ca91654dd7c4224a73ef17900ad735/linux/x64/Cursor-1.6.26-x86_64.AppImage
 
-# Set version and download link for Chromium AppImage
-# NOTE: It's recommended to periodically check the GitHub releases page for the latest stable Chromium AppImage:
-# https://github.com/ivan-hc/Chromium-Web-Browser-appimage/releases
-ENV CHROMIUM_DOWNLOAD_URL="https://github.com/ivan-hc/Chromium-Web-Browser-appimage/releases/download/continuous/Chromium-stable-140.0.7339.127-x86_64.AppImage"
-
 # Update and install necessary packages
 RUN echo "**** install packages ****" && \
     apt-get update && \
@@ -34,10 +29,11 @@ RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Download Chromium AppImage and manage permissions
-RUN echo "**** install Chromium AppImage ****" && \
-    curl --location --output /usr/local/bin/Chromium.AppImage $CHROMIUM_DOWNLOAD_URL && \
-    chmod a+x /usr/local/bin/Chromium.AppImage
+# Install Google Chrome Stable
+RUN echo "**** install Google Chrome Stable ****" && \
+    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/google-chrome-stable_current_amd64.deb && \
+    dpkg -i /tmp/google-chrome-stable_current_amd64.deb || apt-get install -y --no-install-recommends -f && \
+    rm /tmp/google-chrome-stable_current_amd64.deb
 
 # Cleanup package install (moved earlier for apt clean up)
 RUN apt-get autoclean && rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
