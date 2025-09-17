@@ -1,11 +1,5 @@
 FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
 
-LABEL maintainer="arfo_dublo@boards.digital" \
-    org.opencontainers.image.authors="arfo_dublo@boards.digital" \
-    org.opencontainers.image.source="https://github.com/Arfo-du-blo/cursor-in-browser/" \
-    org.opencontainers.image.title="Cursor in browser" \
-    org.opencontainers.image.description="Cursor container image allowing access via web browser"
-
 # Set version, display and download link for Cursor
 ENV DISPLAY=:1
 ENV CURSOR_DOWNLOAD_URL=https://downloads.cursor.com/production/6af2d906e8ca91654dd7c4224a73ef17900ad735/linux/x64/Cursor-1.6.26-x86_64.AppImage
