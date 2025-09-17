@@ -38,16 +38,22 @@ RUN echo "**** install Google Chrome Stable ****" && \
     \
     # Create a wrapper script for Google Chrome with necessary flags
     echo '#!/bin/bash' > /usr/local/bin/google-chrome-wrapper && \
-    echo 'exec /usr/bin/google-chrome --no-sandbox --disable-gpu --disable-dev-shm-usage "$@"' >> /usr/local/bin/google-chrome-wrapper && \
+    echo 'exec /usr/bin/google-chrome --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-setuid-sandbox "$@"' >> /usr/local/bin/google-chrome-wrapper && \
     chmod +x /usr/local/bin/google-chrome-wrapper && \
     \
     # Configure xdg-open to use the wrapper script
     update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/google-chrome-wrapper 200 && \
     update-alternatives --install /usr/bin/gnome-www-browser gnome-www-browser /usr/local/bin/google-chrome-wrapper 200 && \
     xdg-settings set default-web-browser google-chrome.desktop && \
-    # Point the desktop file to the wrapper as well for good measure, though xdg-open should now use the alternatives
+    # Point the desktop file to the wrapper as well for good measure
     sed -i 's/^Exec=\/usr\/bin\/google-chrome/Exec=\/usr\/local\/bin\/google-chrome-wrapper/' /usr/share/applications/google-chrome.desktop && \
-    update-desktop-database
+    update-desktop-database && \
+    \
+    # Verify the wrapper script exists and is executable
+    ls -l /usr/local/bin/google-chrome-wrapper && \
+    # Verify the desktop file points to the wrapper
+    grep "Exec=" /usr/share/applications/google-chrome.desktop
+
 
 # Cleanup package install (moved earlier for apt clean up)
 RUN apt-get autoclean && rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
