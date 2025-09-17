@@ -29,10 +29,10 @@ RUN echo "**** install Google Chrome Stable ****" && \
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/google-chrome-stable_current_amd64.deb && \
     dpkg -i /tmp/google-chrome-stable_current_amd64.deb || apt-get install -y --no-install-recommends -f && \
     rm /tmp/google-chrome-stable_current_amd64.deb && \
+    # Modify the Google Chrome desktop entry to include --no-sandbox flag
+    sed -i 's/^Exec=\/usr\/bin\/google-chrome/Exec=\/usr\/bin\/google-chrome --no-sandbox/' /usr/share/applications/google-chrome.desktop && \
     # Configure xdg-open to use google-chrome
-    # Ensure google-chrome is in the alternatives for x-www-browser
     update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/google-chrome 200 && \
-    # Set google-chrome as the default browser for http and https schemes
     xdg-settings set default-web-browser google-chrome.desktop
 
 # Cleanup package install (moved earlier for apt clean up)
