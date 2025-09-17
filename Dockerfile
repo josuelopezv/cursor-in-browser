@@ -6,7 +6,8 @@ LABEL maintainer="arfo_dublo@boards.digital" \
     org.opencontainers.image.title="Cursor in browser" \
     org.opencontainers.image.description="Cursor container image allowing access via web browser"
 
-# Set version, display and download link for Cursor
+# Set version, display and download link
+ARG CURSOR_VERSION=1.6.26
 ENV DISPLAY=:1
 ENV CURSOR_DOWNLOAD_URL=https://downloads.cursor.com/production/6af2d906e8ca91654dd7c4224a73ef17900ad735/linux/x64/Cursor-1.6.26-x86_64.AppImage
 
@@ -14,53 +15,36 @@ ENV CURSOR_DOWNLOAD_URL=https://downloads.cursor.com/production/6af2d906e8ca9165
 RUN echo "**** install packages ****" && \
     apt-get update && \
     apt-get install -y --no-install-recommends curl wget fuse python3.11-venv libfuse2 python3-xdg libgtk-3-0 \
-    libnotify4 libatspi2.0-0 libsecret-1-0 libnss3 desktop-file-utils fonts-noto-color-emoji git ssh-askpass xdg-utils \
-    fonts-liberation && \
-    # Clean up apt cache to reduce image size
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
-
+    libnotify4 libatspi2.0-0 libsecret-1-0 libnss3 desktop-file-utils fonts-noto-color-emoji git ssh-askpass 
+    
 # Update and install dotnet
 RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod.deb -O packages-microsoft-prod.deb && \
     sudo dpkg -i packages-microsoft-prod.deb && \
-    rm packages-microsoft-prod.deb && \
+    rm packages-microsoft-prod.deb &&\
     apt-get update && \
-    apt-get install -y --no-install-recommends dotnet-sdk-9.0 && \
-    # Clean up apt cache to reduce image size
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends dotnet-sdk-9.0
 
-# Install Google Chrome Stable and configure xdg-open with a wrapper
-RUN echo "**** install Google Chrome Stable ****" && \
-    wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/google-chrome-stable_current_amd64.deb && \
-    dpkg -i /tmp/google-chrome-stable_current_amd64.deb || apt-get install -y --no-install-recommends -f && \
-    rm /tmp/google-chrome-stable_current_amd64.deb && \
-    \
-    # Create a wrapper script for Google Chrome with necessary flags
-    echo '#!/bin/bash' > /usr/local/bin/google-chrome-wrapper && \
-    echo 'exec /usr/bin/google-chrome --no-sandbox --disable-gpu --disable-dev-shm-usage --disable-setuid-sandbox "$@"' >> /usr/local/bin/google-chrome-wrapper && \
-    chmod +x /usr/local/bin/google-chrome-wrapper && \
-    \
-    # Configure xdg-open to use the wrapper script
-    update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/google-chrome-wrapper 200 && \
-    update-alternatives --install /usr/bin/gnome-www-browser gnome-www-browser /usr/local/bin/google-chrome-wrapper 200 && \
-    xdg-settings set default-web-browser google-chrome.desktop && \
-    # Point the desktop file to the wrapper as well for good measure
-    sed -i 's/^Exec=\/usr\/bin\/google-chrome/Exec=\/usr\/local\/bin\/google-chrome-wrapper/' /usr/share/applications/google-chrome.desktop && \
-    update-desktop-database && \
-    \
-    # Verify the wrapper script exists and is executable
-    ls -l /usr/local/bin/google-chrome-wrapper && \
-    # Verify the desktop file points to the wrapper
-    grep "Exec=" /usr/share/applications/google-chrome.desktop
+# Get librewolf version && and install binary
+RUN if [ -z ${LIBREWOLF_VERSION+x} ]; then \
+    LIBREWOLF_VERSION=$(curl -sL https://repo.librewolf.net/dists/librewolf/main/binary-amd64/Packages \
+    | grep -A 4 'Package: librewolf' \
+    | awk '/Version:/ {print $2}' \
+    | sort -V \
+    | tail -1); \
+    fi && \
+    curl -o \
+    /tmp/librewolf.deb -L \
+    "https://repo.librewolf.net/pool/librewolf-${LIBREWOLF_VERSION}-linux-x86_64-deb.deb" && \
+    apt install -y --no-install-recommends \
+    /tmp/librewolf.deb
 
-
-# Cleanup package install (moved earlier for apt clean up)
+# Cleanup package install
 RUN apt-get autoclean && rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
 
 # Download Cursor AppImage and manage permissions
 RUN curl --location --output Cursor.AppImage $CURSOR_DOWNLOAD_URL && \
     chmod a+x Cursor.AppImage
+
 
 # Environment variables
 ENV CUSTOM_PORT="8080" \
@@ -68,7 +52,7 @@ ENV CUSTOM_PORT="8080" \
     CUSTOM_USER="" \
     PASSWORD="" \
     SUBFOLDER="" \
-    TITLE="Cursor Ai Web" \
+    TITLE="Cursor v${CURSOR_VERSION}" \
     FM_HOME="/cursor"
 
 # Add local files and Cursor icon
