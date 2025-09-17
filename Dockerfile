@@ -30,20 +30,24 @@ RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome Stable and configure xdg-open
+# Install Google Chrome Stable and configure xdg-open with a wrapper
 RUN echo "**** install Google Chrome Stable ****" && \
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/google-chrome-stable_current_amd64.deb && \
     dpkg -i /tmp/google-chrome-stable_current_amd64.deb || apt-get install -y --no-install-recommends -f && \
     rm /tmp/google-chrome-stable_current_amd64.deb && \
-    # Modify the Google Chrome desktop entry to include --no-sandbox, --disable-gpu, and --disable-dev-shm-usage flags
-    sed -i 's/^Exec=\/usr\/bin\/google-chrome/Exec=\/usr\/bin\/google-chrome --no-sandbox --disable-gpu --disable-dev-shm-usage/' /usr/share/applications/google-chrome.desktop && \
-    # Verify the modification
-    cat /usr/share/applications/google-chrome.desktop && \
-    # Refresh the desktop database
-    update-desktop-database && \
-    # Configure xdg-open to use google-chrome
-    update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/google-chrome 200 && \
-    xdg-settings set default-web-browser google-chrome.desktop
+    \
+    # Create a wrapper script for Google Chrome with necessary flags
+    echo '#!/bin/bash' > /usr/local/bin/google-chrome-wrapper && \
+    echo 'exec /usr/bin/google-chrome --no-sandbox --disable-gpu --disable-dev-shm-usage "$@"' >> /usr/local/bin/google-chrome-wrapper && \
+    chmod +x /usr/local/bin/google-chrome-wrapper && \
+    \
+    # Configure xdg-open to use the wrapper script
+    update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/local/bin/google-chrome-wrapper 200 && \
+    update-alternatives --install /usr/bin/gnome-www-browser gnome-www-browser /usr/local/bin/google-chrome-wrapper 200 && \
+    xdg-settings set default-web-browser google-chrome.desktop && \
+    # Point the desktop file to the wrapper as well for good measure, though xdg-open should now use the alternatives
+    sed -i 's/^Exec=\/usr\/bin\/google-chrome/Exec=\/usr\/local\/bin\/google-chrome-wrapper/' /usr/share/applications/google-chrome.desktop && \
+    update-desktop-database
 
 # Cleanup package install (moved earlier for apt clean up)
 RUN apt-get autoclean && rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
