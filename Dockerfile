@@ -1,5 +1,11 @@
 FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
 
+LABEL maintainer="arfo_dublo@boards.digital" \
+    org.opencontainers.image.authors="arfo_dublo@boards.digital" \
+    org.opencontainers.image.source="https://github.com/Arfo-du-blo/cursor-in-browser/" \
+    org.opencontainers.image.title="Cursor in browser" \
+    org.opencontainers.image.description="Cursor container image allowing access via web browser"
+
 # Set version, display and download link for Cursor
 ENV DISPLAY=:1
 ENV CURSOR_DOWNLOAD_URL=https://downloads.cursor.com/production/6af2d906e8ca91654dd7c4224a73ef17900ad735/linux/x64/Cursor-1.6.26-x86_64.AppImage
@@ -29,8 +35,12 @@ RUN echo "**** install Google Chrome Stable ****" && \
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/google-chrome-stable_current_amd64.deb && \
     dpkg -i /tmp/google-chrome-stable_current_amd64.deb || apt-get install -y --no-install-recommends -f && \
     rm /tmp/google-chrome-stable_current_amd64.deb && \
-    # Modify the Google Chrome desktop entry to include --no-sandbox flag
-    sed -i 's/^Exec=\/usr\/bin\/google-chrome/Exec=\/usr\/bin\/google-chrome --no-sandbox/' /usr/share/applications/google-chrome.desktop && \
+    # Modify the Google Chrome desktop entry to include --no-sandbox, --disable-gpu, and --disable-dev-shm-usage flags
+    sed -i 's/^Exec=\/usr\/bin\/google-chrome/Exec=\/usr\/bin\/google-chrome --no-sandbox --disable-gpu --disable-dev-shm-usage/' /usr/share/applications/google-chrome.desktop && \
+    # Verify the modification
+    cat /usr/share/applications/google-chrome.desktop && \
+    # Refresh the desktop database
+    update-desktop-database && \
     # Configure xdg-open to use google-chrome
     update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/google-chrome 200 && \
     xdg-settings set default-web-browser google-chrome.desktop
