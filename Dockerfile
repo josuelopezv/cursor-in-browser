@@ -14,7 +14,8 @@ ENV CURSOR_DOWNLOAD_URL=https://downloads.cursor.com/production/6af2d906e8ca9165
 RUN echo "**** install packages ****" && \
     apt-get update && \
     apt-get install -y --no-install-recommends curl wget fuse python3.11-venv libfuse2 python3-xdg libgtk-3-0 \
-    libnotify4 libatspi2.0-0 libsecret-1-0 libnss3 desktop-file-utils fonts-noto-color-emoji git ssh-askpass xdg-utils && \
+    libnotify4 libatspi2.0-0 libsecret-1-0 libnss3 desktop-file-utils fonts-noto-color-emoji git ssh-askpass xdg-utils \
+    fonts-liberation && \
     # Clean up apt cache to reduce image size
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
