@@ -52,7 +52,7 @@ ENV CUSTOM_PORT="8080" \
     CUSTOM_USER="" \
     PASSWORD="" \
     SUBFOLDER="" \
-    TITLE="Chromium Browser" \
+    TITLE="Cursor Ai Web" \
     FM_HOME="/cursor"
 
 # Add local files and Cursor icon
