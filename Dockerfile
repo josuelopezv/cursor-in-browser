@@ -14,7 +14,7 @@ ENV CURSOR_DOWNLOAD_URL=https://downloads.cursor.com/production/6af2d906e8ca9165
 RUN echo "**** install packages ****" && \
     apt-get update && \
     apt-get install -y --no-install-recommends curl wget fuse python3.11-venv libfuse2 python3-xdg libgtk-3-0 \
-    libnotify4 libatspi2.0-0 libsecret-1-0 libnss3 desktop-file-utils fonts-noto-color-emoji git ssh-askpass && \
+    libnotify4 libatspi2.0-0 libsecret-1-0 libnss3 desktop-file-utils fonts-noto-color-emoji git ssh-askpass xdg-utils && \
     # Clean up apt cache to reduce image size
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
@@ -29,11 +29,16 @@ RUN wget https://packages.microsoft.com/config/debian/12/packages-microsoft-prod
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
-# Install Google Chrome Stable
+# Install Google Chrome Stable and configure xdg-open
 RUN echo "**** install Google Chrome Stable ****" && \
     wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb -O /tmp/google-chrome-stable_current_amd64.deb && \
     dpkg -i /tmp/google-chrome-stable_current_amd64.deb || apt-get install -y --no-install-recommends -f && \
-    rm /tmp/google-chrome-stable_current_amd64.deb
+    rm /tmp/google-chrome-stable_current_amd64.deb && \
+    # Configure xdg-open to use google-chrome
+    # Ensure google-chrome is in the alternatives for x-www-browser
+    update-alternatives --install /usr/bin/x-www-browser x-www-browser /usr/bin/google-chrome 200 && \
+    # Set google-chrome as the default browser for http and https schemes
+    xdg-settings set default-web-browser google-chrome.desktop
 
 # Cleanup package install (moved earlier for apt clean up)
 RUN apt-get autoclean && rm -rf /var/lib/apt/lists/* /var/tmp/* /tmp/*
