@@ -3,7 +3,7 @@ FROM ghcr.io/linuxserver/baseimage-kasmvnc:debianbookworm
 # Set version, display and download link
 ARG CURSOR_VERSION=1.7
 ENV DISPLAY=:1
-ENV CURSOR_DOWNLOAD_URL=https://api2.cursor.sh/updates/download/golden/linux-x64/cursor/1.7
+ENV CURSOR_DOWNLOAD_URL=https://api2.cursor.sh/updates/download/golden/linux-x64/cursor/2.2
 
 # Update and install necessary packages
 RUN echo "**** install packages ****" && \
